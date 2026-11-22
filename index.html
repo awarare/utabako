@@ -46,17 +46,56 @@ h2{font-size:14px;font-weight:600;color:var(--sub);margin:0 0 4px}
 .tr{font-size:17px;margin:0 0 16px}
 .kake{font-size:14px;margin:0 0 16px;padding-left:1.2em}
 .note{font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:12px}
+#add[hidden]{display:none}
+#add{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--panel)}
+#add label{display:block;font-size:12px;color:var(--sub);margin:8px 0 2px}
+#add input,#add textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+#add button,.sm{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--ink);border-radius:8px;background:none;color:var(--ink);cursor:pointer}
+#add .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#add .hint{font-size:12px;color:var(--sub);margin:0 0 4px}
+#add h2{margin-top:14px}
+.msg{font-size:13px;color:var(--aux);min-height:1.5em;margin:0}
+.detail label{display:block;font-size:12px;color:var(--sub);margin:6px 0 2px}
+.detail input,.detail textarea,.detail select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.detail .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.sm{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--ink);border-radius:8px;background:none;color:var(--ink);cursor:pointer}
+#check{font-size:14px;margin-bottom:20px}#check ul{padding-left:1.2em;margin:4px 0;list-style:none}#check li{margin:3px 0}
+#add .modes label{display:inline-flex;gap:5px;align-items:center;margin:0 14px 0 0;font-size:14px;color:var(--ink)}
+#add .modes input{width:auto}
+#series{align-items:center;font-size:13px;color:var(--sub)}
+#extra label{display:block;font-size:12px;color:var(--sub);margin:6px 0 2px}
+#extra textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+#extra .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 </style>
 </head>
 <body>
 <h1>古典短歌アプリ 試作</h1>
 <div class="nav" id="nav"></div>
+<div class="nav" id="series" style="display:none"></div>
+<section id="add" hidden>
+<h2>歌を足す(この端末の中だけに保存されます)</h2>
+<div class="modes"><label><input type="radio" name="mode" value="one" checked> 単発の歌</label><label><input type="radio" name="mode" value="series"> 連作</label></div>
+<div id="g-title-wrap" hidden><label for="f-gt">連作の題</label><input id="f-gt"></div>
+<label for="f-author">作者(なければ空でOK)</label><input id="f-author">
+<label for="f-text" id="l-text">本文(5句をスペースで区切る。ルビは 漢字《よみ》)</label><textarea id="f-text" rows="4"></textarea>
+<label for="f-tr" id="l-tr">現代語訳(あとで書いてもOK)</label><textarea id="f-tr" rows="3"></textarea>
+<div id="kake-wrap"><label for="f-kake">掛詞などのメモ(1行に1つ)</label><textarea id="f-kake" rows="2"></textarea></div>
+<div class="row"><button id="b-save">保存する</button></div>
+<h2>分解ずみのJSONを取り込む</h2>
+<p class="hint">パソコンの analyze.py が作った poems.json を使います。</p>
+<input type="file" id="f-file" accept=".json,application/json">
+<label for="f-igt">連作として取り込むなら、連作の題(空なら単発)</label><input id="f-igt">
+<label for="f-json">または、JSONをここに貼り付け</label><textarea id="f-json" rows="3"></textarea>
+<div class="row"><button id="b-import">取り込む</button><button id="b-export">自分の歌をコピー(バックアップ)</button></div>
+<p class="msg" id="msg" aria-live="polite"></p>
+</section>
 <p class="meta" id="meta"></p>
 <div class="poem" id="poem"></div>
 <div class="legend" id="legend"></div>
 <div class="detail" id="detail" aria-live="polite"></div>
+<div id="check"></div>
 <div id="extra"></div>
-<p class="note">本文は陽明文庫旧蔵カルタ(底本)による。濁点・踊り字・ルビは補ったもの(下書き)。文法分解は中古和文UniDic(国立国語研究所、CC BY-NC-SA)の自動解析で、「手直し」の語は辞書の結果を直したもの(未確認)。意味は「AI下書き」で、人の確認前です。</p>
+<p class="note">本文は陽明文庫旧蔵カルタ(底本)による。濁点・踊り字・ルビは補ったもの(下書き)。文法分解は中古和文UniDic(国立国語研究所、CC BY-NC-SA)の自動解析で、「手直し」の語は辞書の結果を直したもの(未確認)。意味は「AI下書き」で、人の確認前です。自分で足した歌は、この端末の中だけに保存されます。</p>
 <script>
 const POEMS=[{"id":"1","author":"天智天皇","ruby":"秋《あき》の田《た》の かりほの盧《いほ》の とまをあらみ 我《わが》ころも手《で》は 露《つゆ》にぬれつつ","lines":[[{"s":"秋","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"田","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"かりほ","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"盧","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"とま","t":"n"},{"s":"を","t":"p","k":"格助詞"},{"s":"あら","t":"adj","k":"ク活用・語幹","b":"あらし","review":"活用・語の同定を古語辞典で確認"},{"s":"み","t":"n"}],[{"s":"我","t":"n"},{"s":"ころも手","t":"n"},{"s":"は","t":"p","k":"係助詞"}],[{"s":"露","t":"n"},{"s":"に","t":"p","k":"格助詞"},{"s":"ぬれ","t":"v","k":"ラ行下二段活用・連用形","b":"ぬる","review":"活用・語の同定を古語辞典で確認"},{"s":"つつ","t":"p","k":"接続助詞"}]]},{"id":"2","author":"持統天皇","ruby":"春《はる》過《すぎ》て 夏《なつ》来《き》にけらし 白妙《しろたへ》の 衣《ころも》ほすてふ あまの香来山《かぐやま》","lines":[[{"s":"春","t":"n"},{"s":"過","t":"v","k":"ガ行上二段活用・連用形","b":"過ぐ","review":"活用・語の同定を古語辞典で確認"},{"s":"て","t":"p","k":"接続助詞"}],[{"s":"夏","t":"n"},{"s":"来","t":"v","k":"カ行変格活用・連用形","b":"来","review":"活用・語の同定を古語辞典で確認"},{"s":"に","t":"aux","k":"連用形","b":"ぬ","d":"意味候補: 完了／強意","review":"意味を文脈から選ぶ"},{"s":"けらし","t":"aux","k":"終止形","b":"けらし","d":"意味候補: (表にない助動詞)","review":"助動詞の意味が表にない"}],[{"s":"白妙","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"衣","t":"n"},{"s":"ほす","t":"v","k":"サ行四段活用・終止形","b":"ほす","review":"活用・語の同定を古語辞典で確認"},{"s":"てふ","t":"v","k":"ハ行四段活用・連体形","b":"てふ","review":"活用・語の同定を古語辞典で確認"}],[{"s":"あま","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"香","t":"n"},{"s":"来山","t":"n"}]]},{"id":"3","author":"柿本人丸","ruby":"あし引《ひき》の 山鳥《やまどり》のおの しだり尾《を》の ながながし夜《よ》を 独《ひとり》かもねん","lines":[[{"s":"あし引","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"山鳥","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"お","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"しだり尾","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"ながながし","t":"adj","k":"シク活用・語幹","b":"ながながし","review":"活用・語の同定を古語辞典で確認"},{"s":"夜","t":"n"},{"s":"を","t":"p","k":"格助詞"}],[{"s":"独","t":"n"},{"s":"か","t":"p","k":"係助詞"},{"s":"も","t":"p","k":"係助詞"},{"s":"ね","t":"v","k":"ナ行下二段活用・未然形","b":"ぬ","review":"活用・語の同定を古語辞典で確認"},{"s":"ん","t":"aux","k":"連体形","b":"む","d":"意味候補: 推量／意志／勧誘／婉曲","review":"意味を文脈から選ぶ"}]]},{"id":"4","author":"山辺赤人","ruby":"田子《たご》のうらに うち出《いで》てみれば しろ妙《たへ》の 不二《ふじ》の高根《たかね》に ゆきは降《ふり》つつ","lines":[[{"s":"田子","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"うら","t":"n"},{"s":"に","t":"p","k":"格助詞"}],[{"s":"うち","t":"n"},{"s":"出","t":"v","k":"ダ行下二段活用・連用形","b":"出づ","review":"活用・語の同定を古語辞典で確認"},{"s":"て","t":"p","k":"接続助詞"},{"s":"みれ","t":"v","k":"マ行上一段活用・已然形","b":"みる","review":"活用・語の同定を古語辞典で確認"},{"s":"ば","t":"p","k":"接続助詞"}],[{"s":"しろ","t":"n"},{"s":"妙","t":"adj","k":"形状詞(形容動詞の語幹)","b":"妙"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"不二","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"高根","t":"n"},{"s":"に","t":"p","k":"格助詞"}],[{"s":"ゆき","t":"v","k":"カ行四段活用・連用形","b":"ゆく","review":"活用・語の同定を古語辞典で確認"},{"s":"は","t":"p","k":"係助詞"},{"s":"降","t":"v","k":"ラ行四段活用・連用形","b":"降る","review":"活用・語の同定を古語辞典で確認"},{"s":"つつ","t":"p","k":"接続助詞"}]]},{"id":"5","author":"猿丸大夫","ruby":"おく山《やま》に 紅葉《もみぢ》ふみわけ 鳴《なく》しかの 聲《こゑ》きくときぞ 秋《あき》はかなしき","lines":[[{"s":"おく山","t":"n"},{"s":"に","t":"p","k":"格助詞"}],[{"s":"紅葉","t":"n"},{"s":"ふみ","t":"v","k":"マ行四段活用・連用形","b":"ふむ","review":"活用・語の同定を古語辞典で確認"},{"s":"わけ","t":"v","k":"カ行下二段活用・連用形","b":"わく","review":"活用・語の同定を古語辞典で確認"}],[{"s":"鳴","t":"v","k":"カ行四段活用・連体形","b":"鳴く","review":"活用・語の同定を古語辞典で確認"},{"s":"しか","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"聲","t":"n"},{"s":"きく","t":"v","k":"カ行四段活用・連体形","b":"きく","review":"活用・語の同定を古語辞典で確認"},{"s":"とき","t":"n"},{"s":"ぞ","t":"p","k":"係助詞"}],[{"s":"秋","t":"n"},{"s":"は","t":"p","k":"係助詞"},{"s":"かなしき","t":"adj","k":"シク活用・連体形","b":"かなし","review":"活用・語の同定を古語辞典で確認"}]]},{"id":"6","author":"中納言家持","ruby":"鵲《かささぎ》の 渡《わた》せるはしに をく霜《しも》の しろきをみれば よぞ更《ふけ》にける","lines":[[{"s":"鵲","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"渡せ","t":"v","k":"サ行四段活用・命令形","b":"渡す","review":"活用・語の同定を古語辞典で確認"},{"s":"る","t":"aux","k":"連体形","b":"り","d":"意味候補: 完了／存続","review":"意味を文脈から選ぶ"},{"s":"はし","t":"n"},{"s":"に","t":"p","k":"格助詞"}],[{"s":"をく","t":"v","k":"カ行四段活用・連体形","b":"をく","review":"活用・語の同定を古語辞典で確認"},{"s":"霜","t":"n"},{"s":"の","t":"p","k":"格助詞"}],[{"s":"しろき","t":"adj","k":"ク活用・連体形","b":"しろし","review":"活用・語の同定を古語辞典で確認"},{"s":"を","t":"p","k":"格助詞"},{"s":"みれ","t":"v","k":"マ行上一段活用・已然形","b":"みる","review":"活用・語の同定を古語辞典で確認"},{"s":"ば","t":"p","k":"接続助詞"}],[{"s":"よ","t":"n"},{"s":"ぞ","t":"p","k":"係助詞"},{"s":"更","t":"v","k":"カ行下二段活用・連用形","b":"更く","review":"活用・語の同定を古語辞典で確認"},{"s":"に","t":"aux","k":"連用形","b":"ぬ","d":"意味候補: 完了／強意","review":"意味を文脈から選ぶ"},{"s":"ける","t":"aux","k":"連体形","b":"けり","d":"意味候補: 過去／詠嘆","review":"意味を文脈から選ぶ"}]]},{"id":"7","author":"安倍仲麿","ruby":"天《あま》の原《はら》 ふりさけみれば 春日《かすが》なる 三笠《みかさ》のやまに 出《いで》し月《つき》かも","lines":[[{"s":"天","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"原","t":"n"}],[{"s":"ふり","t":"v","k":"ラ行四段活用・連用形","b":"ふる","review":"活用・語の同定を古語辞典で確認"},{"s":"さけ","t":"v","k":"カ行下二段活用・連用形","b":"さく","review":"活用・語の同定を古語辞典で確認"},{"s":"みれ","t":"v","k":"マ行上一段活用・已然形","b":"みる","review":"活用・語の同定を古語辞典で確認"},{"s":"ば","t":"p","k":"接続助詞"}],[{"s":"春日","t":"n"},{"s":"なる","t":"aux","k":"連体形","b":"なり","d":"意味候補: 断定／存在","review":"意味を文脈から選ぶ"}],[{"s":"三笠","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"やま","t":"n"},{"s":"に","t":"p","k":"格助詞"}],[{"s":"出","t":"v","k":"ダ行下二段活用・連用形","b":"出づ","review":"活用・語の同定を古語辞典で確認"},{"s":"し","t":"aux","k":"連体形","b":"き","d":"意味候補: 過去"},{"s":"月","t":"n"},{"s":"か","t":"p","k":"係助詞"},{"s":"も","t":"p","k":"係助詞"}]]},{"id":"8","author":"喜撰法師","ruby":"我《わが》盧《いほ》は みやこのたつみ しかぞ住《すむ》 よを宇治山《うぢやま》と 人《ひと》はいふなり","lines":[[{"s":"我","t":"n"},{"s":"盧","t":"n"},{"s":"は","t":"p","k":"係助詞"}],[{"s":"みやこ","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"たつみ","t":"n"}],[{"s":"しか","t":"o"},{"s":"ぞ","t":"p","k":"係助詞"},{"s":"住","t":"v","k":"マ行四段活用・連体形","b":"住む","review":"活用・語の同定を古語辞典で確認"}],[{"s":"よ","t":"n"},{"s":"を","t":"p","k":"格助詞"},{"s":"宇治","t":"n"},{"s":"山","t":"n"},{"s":"と","t":"p","k":"格助詞"}],[{"s":"人","t":"n"},{"s":"は","t":"p","k":"係助詞"},{"s":"いふ","t":"v","k":"ハ行四段活用・終止形","b":"いふ","review":"活用・語の同定を古語辞典で確認"},{"s":"なり","t":"aux","k":"終止形","b":"なり","d":"意味候補: 伝聞／推定","review":"意味を文脈から選ぶ"}]]},{"id":"9","author":"小野小町","ruby":"花《はな》の色《いろ》は うつりにけりな いたづらに わが身《み》よにふる ながめせしまに","lines":[[{"s":"花","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"色","t":"n"},{"s":"は","t":"p","k":"係助詞"}],[{"s":"うつり","t":"v","k":"ラ行四段活用・連用形","b":"うつる","review":"活用・語の同定を古語辞典で確認"},{"s":"に","t":"aux","k":"連用形","b":"ぬ","d":"意味候補: 完了／強意","review":"意味を文脈から選ぶ"},{"s":"けり","t":"aux","k":"終止形","b":"けり","d":"意味候補: 過去／詠嘆","review":"意味を文脈から選ぶ"},{"s":"な","t":"p","k":"終助詞"}],[{"s":"いたづら","t":"adj","k":"形状詞(形容動詞の語幹)","b":"いたづら"},{"s":"に","t":"aux","k":"連用形","b":"なり","d":"意味候補: 断定／存在","review":"意味を文脈から選ぶ"}],[{"s":"わ","t":"n"},{"s":"が","t":"p","k":"格助詞"},{"s":"身","t":"n"},{"s":"よ","t":"n"},{"s":"に","t":"p","k":"格助詞"},{"s":"ふる","t":"v","k":"ラ行上二段活用・終止形","b":"ふる","review":"活用・語の同定を古語辞典で確認"}],[{"s":"ながめ","t":"v","k":"マ行下二段活用・連用形","b":"ながむ","review":"活用・語の同定を古語辞典で確認"},{"s":"せ","t":"v","k":"サ行変格活用・未然形","b":"す","review":"活用・語の同定を古語辞典で確認"},{"s":"し","t":"aux","k":"連体形","b":"き","d":"意味候補: 過去"},{"s":"ま","t":"n"},{"s":"に","t":"p","k":"格助詞"}]]},{"id":"10","author":"蝉丸","ruby":"是《これ》や此《この》 行《ゆく》もかへるも 別《わかれ》ては しるもしらぬも 相坂《あふさか》のせき","lines":[[{"s":"是","t":"n"},{"s":"や","t":"p","k":"係助詞"},{"s":"此","t":"n"}],[{"s":"行","t":"v","k":"カ行四段活用・連用形","b":"行く","review":"活用・語の同定を古語辞典で確認"},{"s":"も","t":"p","k":"係助詞"},{"s":"かへる","t":"v","k":"ラ行四段活用・連体形","b":"かへる","review":"活用・語の同定を古語辞典で確認"},{"s":"も","t":"p","k":"係助詞"}],[{"s":"別","t":"v","k":"ラ行下二段活用・連用形","b":"別る","review":"活用・語の同定を古語辞典で確認"},{"s":"て","t":"p","k":"接続助詞"},{"s":"は","t":"p","k":"係助詞"}],[{"s":"しる","t":"v","k":"ラ行四段活用・連体形","b":"しる","review":"活用・語の同定を古語辞典で確認"},{"s":"も","t":"p","k":"係助詞"},{"s":"しら","t":"v","k":"ラ行四段活用・未然形","b":"しる","review":"活用・語の同定を古語辞典で確認"},{"s":"ぬ","t":"aux","k":"連体形","b":"ず","d":"意味候補: 打消"},{"s":"も","t":"p","k":"係助詞"}],[{"s":"相坂","t":"n"},{"s":"の","t":"p","k":"格助詞"},{"s":"せき","t":"n"}]]}];
 const FIX={"9:3:5":{"t":"v","b":"ふ(経)","k":"ハ行下二段活用・連体形","d":"時が過ぎる。「降る」との掛詞。次の「ながめ」にかかる。","review":""},"9:4:0":{"t":"n","b":"","k":"","d":"物思い。「長雨」との掛詞。","review":""},"4:4:0":{"t":"n","b":"","k":"","d":"雪。辞書は動詞「ゆく」と誤判定。","review":""},"4:2:1":{"t":"n","b":"","k":"","d":"白妙(しろたへ)は白い布。ここは「真っ白な」の意。辞書は形状詞と判定。","review":""},"2:3:2":{"t":"o","b":"といふ","k":"連語(「といふ」の縮まった形)","d":"「…という」。","review":""},"10:1:0":{"b":"行く","k":"カ行四段活用・連体形","review":"辞書は連用形と判定。「行くも」は連体形のはず"}};
@@ -69,7 +108,21 @@ function col(t){return"var(--"+t+")"}
 var btns=[],P=null;
 document.getElementById("legend").innerHTML=Object.keys(LABEL).map(function(k){return'<span style="--c:'+col(k)+'"><i></i>'+LABEL[k]+'</span>'}).join("");
 var nav=document.getElementById("nav");
-POEMS.forEach(function(p,i){var b=document.createElement("button");b.textContent=p.id;b.setAttribute("aria-pressed","false");b.onclick=function(){load(i)};nav.appendChild(b)});
+var USER=[],ALL=POEMS.slice(),SK="tanka_user_v1";
+try{USER=JSON.parse(localStorage.getItem(SK)||"[]")||[]}catch(e){USER=[]}
+var USERFIX={};try{USERFIX=JSON.parse(localStorage.getItem("tanka_fix_v1")||"{}")||{}}catch(e){USERFIX={}}
+function saveFix(){try{localStorage.setItem("tanka_fix_v1",JSON.stringify(USERFIX));return true}catch(e){return false}}
+function saveUser(){try{localStorage.setItem(SK,JSON.stringify(USER));return true}catch(e){return false}}
+function rebuild(){ALL=POEMS.concat(USER)}
+function navItems(all){var seen={},out=[];
+ all.forEach(function(p,i){if(p.grp){if(seen[p.grp])return;seen[p.grp]=1;out.push({label:p.gt||"連作",i:i,grp:p.grp})}else out.push({label:p.id,i:i})});return out}
+function membersOf(all,g){var r=[];all.forEach(function(q,i){if(q.grp===g)r.push(i)});return r}
+function renderNav(){nav.innerHTML="";
+ navItems(ALL).forEach(function(it){var b=document.createElement("button");b.textContent=it.label;b.setAttribute("aria-pressed","false");
+  if(it.grp)b.dataset.grp=it.grp;else b.dataset.i=it.i;b.onclick=function(){load(it.i)};nav.appendChild(b)});
+ var pb=document.createElement("button");pb.textContent="＋";pb.setAttribute("aria-label","歌を足す");pb.setAttribute("aria-pressed","false");
+ pb.onclick=function(){var a=document.getElementById("add");a.hidden=!a.hidden};nav.appendChild(pb)}
+rebuild();renderNav();
 function parseRuby(s){var runs=[],plain="",re=/([\u4E00-\u9FFF々]+)《([^》]+)》|(\S)|(\s+)/g,m;
  while((m=re.exec(s))){if(m[1]){runs.push({a:plain.length,b:plain.length+m[1].length,r:m[2]});plain+=m[1]}else if(m[3])plain+=m[3]}
  return runs}
@@ -82,9 +135,16 @@ function fill(btn,s,a,b,runs){var h="",i=0;
   h+=covered&&!inside?chunk:'<ruby>'+chunk+'<rt>'+esc(r.r)+'</rt></ruby>';
   i=e}
  btn.innerHTML=h}
-function load(pi){P=POEMS[pi];btns=[];
- Array.prototype.forEach.call(nav.children,function(c,i){c.setAttribute("aria-pressed",i==pi?"true":"false")});
- document.getElementById("meta").textContent=P.author+" ・ 百人一首"+P.id+"番";
+var CUR=0;
+function load(pi){P=ALL[pi];CUR=pi;btns=[];var allTok=[];
+ Array.prototype.forEach.call(nav.children,function(c){var on=c.dataset.grp?(c.dataset.grp===P.grp):(c.dataset.i!==undefined&&+c.dataset.i===pi);c.setAttribute("aria-pressed",on?"true":"false")});
+ var sb=document.getElementById("series"),gtxt="";
+ if(P.grp){var mem=membersOf(ALL,P.grp);sb.style.display="flex";sb.innerHTML="";
+  var lab=document.createElement("span");lab.textContent="連作「"+P.gt+"」";sb.appendChild(lab);
+  mem.forEach(function(gi,n){var c=document.createElement("button");c.textContent=n+1;c.setAttribute("aria-pressed",gi===pi?"true":"false");c.onclick=function(){load(gi)};sb.appendChild(c)});
+  gtxt=" ・ "+P.gt+" "+(mem.indexOf(pi)+1)+"/"+mem.length}
+ else{sb.style.display="none";sb.innerHTML=""}
+ document.getElementById("meta").textContent=P.author+(/^\d+$/.test(P.id)?" ・ 百人一首"+P.id+"番":"")+gtxt;
  document.getElementById("detail").innerHTML='<p class="empty">語をタップすると、品詞と活用が出ます。「?」は要確認の語です。</p>';
  var runs=parseRuby(P.ruby),off=0,poem=document.getElementById("poem");poem.innerHTML="";
  P.lines.forEach(function(line,li){
@@ -95,11 +155,12 @@ function load(pi){P=POEMS[pi];btns=[];
    var o=Object.assign({},tk,fx||{});o.fixed=!!fx;
    var key=P.id+"|"+tk.s;
    if(!fx){o.ai=MEANS[key]||(tk.t==="p"?PART[tk.s]:"")}
+   o.key=P.id+":"+li+":"+ti;var uf=USERFIX[o.key];if(uf){Object.assign(o,uf);o.fixed=true;o.mine=true;o.review="";o.ai=""}
    var bt=document.createElement("button");
    bt.className="tok"+(o.review?" rv":"");
    bt.style.setProperty("--c",col(o.t));bt.setAttribute("aria-pressed","false");
    fill(bt,tk.s,a,b,runs);
-   bt.onclick=function(){show(o,bt)};
+   allTok.push(o);bt.onclick=function(){show(o,bt)};
    row.appendChild(bt);btns.push(bt);made.push({btn:bt,a:a,b:b});
   });
   runs.forEach(function(r){
@@ -111,21 +172,137 @@ function load(pi){P=POEMS[pi];btns=[];
   });
   poem.appendChild(row);
  });
- var m=META[P.id];
- document.getElementById("extra").innerHTML=m?'<h2>現代語訳(AI下書き・未確認)</h2><p class="tr">'+esc(m.tr)+'</p>'+(m.kake?'<h2>掛詞</h2><ul class="kake">'+m.kake.map(function(k){return"<li>"+esc(k)+"</li>"}).join("")+'</ul>':''):'<p class="empty">修辞法は、これから足します。</p>';
+ renderCheck(allTok);
+ var m=META[P.id]||((P.tr||(P.kake&&P.kake.length))?{tr:P.tr||"",kake:(P.kake&&P.kake.length)?P.kake:null,own:true}:null);
+ document.getElementById("extra").innerHTML=m?'<h2>'+(m.own?'現代語訳':'現代語訳(AI下書き・未確認)')+'</h2><p class="tr">'+esc(m.tr)+'</p>'+(m.kake?'<h2>掛詞</h2><ul class="kake">'+m.kake.map(function(k){return"<li>"+esc(k)+"</li>"}).join("")+'</ul>':''):'<p class="empty">修辞法は、これから足します。</p>';
+ if(P.user){var ex=document.getElementById("extra");
+  ex.insertAdjacentHTML("beforeend",'<div class="row"><button id="b-edt" class="sm">訳・メモを直す</button><button id="b-del" class="sm">この歌を消す</button>'+(P.grp?'<button id="b-delg" class="sm">連作ごと消す</button>':'')+'</div>');
+  document.getElementById("b-edt").onclick=function(){
+   ex.innerHTML='<label for="x-tr">現代語訳</label><textarea id="x-tr" rows="3"></textarea><label for="x-kake">掛詞などのメモ(1行に1つ)</label><textarea id="x-kake" rows="3"></textarea><div class="row"><button class="sm" id="x-ok">保存</button><button class="sm" id="x-no">やめる</button></div>';
+   document.getElementById("x-tr").value=P.tr||"";document.getElementById("x-kake").value=(P.kake||[]).join("\n");
+   document.getElementById("x-ok").onclick=function(){P.tr=document.getElementById("x-tr").value.trim();
+    P.kake=document.getElementById("x-kake").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);saveUser();load(CUR)};
+   document.getElementById("x-no").onclick=function(){load(CUR)}};
+  document.getElementById("b-del").onclick=function(){if(confirm("この歌を消しますか？")){USER=USER.filter(function(u){return u!==P});saveUser();rebuild();renderNav();load(0)}};
+  if(P.grp)document.getElementById("b-delg").onclick=function(){if(confirm("連作「"+P.gt+"」を全部消しますか？")){var g=P.grp;USER=USER.filter(function(u){return u.grp!==g});saveUser();rebuild();renderNav();load(0)}}}
 }
+var FORMS=["未然形","連用形","終止形","連体形","已然形","命令形"];
+var REQ={"ず":["未然形"],"む":["未然形"],"むず":["未然形"],"じ":["未然形"],"まし":["未然形"],"る":["未然形"],"らる":["未然形"],"す":["未然形"],"さす":["未然形"],"しむ":["未然形"],"まほし":["未然形"],"き":["連用形"],"けり":["連用形"],"つ":["連用形"],"ぬ":["連用形"],"たり":["連用形"],"けむ":["連用形"],"たし":["連用形"],"らむ":["終止形"],"らし":["終止形"],"べし":["終止形"],"まじ":["終止形"],"めり":["終止形"],"なり":["終止形","連体形"],"り":["已然形","命令形"]};
+var PREQ={"て":["連用形"],"つつ":["連用形"],"ど":["已然形"],"ども":["已然形"],"ば":["未然形","已然形"]};
+function formOf(t){if(!t||(t.t!=="v"&&t.t!=="adj"&&t.t!=="aux"))return"";var f=(t.k||"").split("・").pop();return FORMS.indexOf(f)>=0?f:""}
+function has(t,s){return(t.k||"").indexOf(s)>=0}
+function runChecks(toks){var out=[];
+ for(var i=1;i<toks.length;i++){var c=toks[i],p=toks[i-1],pf=formOf(p);if(!pf)continue;var need=null;
+  if(c.t==="aux"&&REQ[c.b]){if(c.b==="なり"&&formOf(c)==="連用形")continue;need=REQ[c.b]}
+  else if(c.t==="p"&&PREQ[c.s]&&has(c,"接続助詞")){need=PREQ[c.s]}
+  if(!need)continue;
+  var ok=need.indexOf(pf)>=0;
+  if(!ok&&pf==="連体形"&&has(p,"ラ行変格")&&need.indexOf("終止形")>=0)ok=true;
+  var exc="";
+  if(!ok&&c.b==="き"&&pf==="未然形"&&(has(p,"サ行変格")||has(p,"カ行変格"))){ok=true;exc="サ変・カ変は未然形に付く例外。"}
+  var nm="「"+c.s+"」"+(c.t==="aux"?"(「"+c.b+"」)":"");
+  out.push({ok:ok,text:ok?"「"+p.s+"」("+pf+") + "+nm+": "+(exc||need.join("か")+"に付く。")+"合っています。"
+   :"「"+p.s+"」は"+pf+"ですが、"+nm+"は"+need.join("か")+"に付くのが普通です。"})}
+ for(var j=0;j<toks.length;j++){var k=toks[j];if(k.t!=="p")continue;var exp=null;
+  if(k.s==="こそ")exp="已然形";else if((k.s==="ぞ"||k.s==="なむ"||k.s==="や"||k.s==="か")&&has(k,"係助詞"))exp="連体形";
+  if(!exp)continue;var a=-1;
+  for(var m=j+1;m<toks.length;m++){if(formOf(toks[m])){a=m;break}}
+  if(a<0)continue;var z=a;while(z+1<toks.length&&toks[z+1].t==="aux"&&formOf(toks[z+1]))z++;
+  var zf=formOf(toks[z]);
+  out.push({ok:zf===exp,text:zf===exp?"係り結び: 「"+k.s+"」の結び「"+toks[z].s+"」は"+exp+"。合っています。"
+   :"係り結び: 「"+k.s+"」の結びは"+exp+"のはずですが、「"+toks[z].s+"」は"+zf+"です。"})}
+ return out}
+function renderCheck(toks){var box=document.getElementById("check");
+ if(toks.length&&toks[0].plain){box.innerHTML="";return}
+ var r=runChecks(toks);
+ box.innerHTML='<h2>文法チェック(目安)</h2>'+(r.length?'<ul>'+r.map(function(x){return'<li>'+(x.ok?'✔ ':'⚠ ')+esc(x.text)+'</li>'}).join("")+'</ul>':'<p class="empty">確認できる接続はありません。</p>')
+  +'<p class="note" style="border:0;padding:0">辞書の分解が違っていると、ここも違って出ます。語を直すと、結果も変わります。</p>'}
 function show(o,b){
  btns.forEach(function(x){x.setAttribute("aria-pressed","false")});
  b.setAttribute("aria-pressed","true");
+ if(o.plain){document.getElementById("detail").innerHTML='<p class="empty">この歌には文法の分解がありません。パソコンの analyze.py で分解したJSONを取り込むと、語ごとに見られます。</p>';return}
  var h='<div class="w">'+esc(o.s)+'</div><div class="pos" style="--c:'+col(o.t)+'">'+LABEL[o.t]+(o.k?"("+esc(o.k)+")":"")+'</div><dl>';
  if(o.b)h+='<dt>原形</dt><dd>'+esc(o.b)+'</dd>';
  if(o.d)h+='<dt>'+(o.fixed?'意味':'意味の候補')+'</dt><dd>'+esc(o.d)+'</dd>';
  if(o.ai)h+='<dt>この歌での意味(AI下書き)</dt><dd>'+esc(o.ai)+'</dd>';
- if(o.fixed)h+='<dt>手直し</dt><dd>辞書の結果を直しました(未確認)</dd>';
+ if(o.fixed)h+='<dt>手直し</dt><dd>'+(o.mine?'自分で直しました':'辞書の結果を直しました(未確認)')+'</dd>';
  if(o.review)h+='<dt>要確認</dt><dd>'+esc(o.review)+'</dd>';
- document.getElementById("detail").innerHTML=h+'</dl>';
+ h+='</dl><div class="row"><button class="sm" id="b-edit">この語を直す</button></div>';
+ var dt=document.getElementById("detail");dt.innerHTML=h;
+ document.getElementById("b-edit").onclick=function(){editForm(o,b)};
 }
-load(8);
+function editForm(o,b){
+ var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+'>'+LABEL[k]+'</option>'}).join("");
+ var dt=document.getElementById("detail");
+ dt.innerHTML='<div class="w">'+esc(o.s)+'</div><label for="e-t">品詞</label><select id="e-t">'+opts+'</select>'
+  +'<label for="e-b">原形</label><input id="e-b" value="'+esc(o.b||"").replace(/"/g,"&quot;")+'">'
+  +'<label for="e-k">活用(例: ハ行下二段活用・連体形)</label><input id="e-k" value="'+esc(o.k||"").replace(/"/g,"&quot;")+'">'
+  +'<label for="e-d">意味</label><textarea id="e-d" rows="2">'+esc(o.d||o.ai||"")+'</textarea>'
+  +'<div class="row"><button class="sm" id="e-ok">保存</button><button class="sm" id="e-reset">元に戻す</button><button class="sm" id="e-cancel">やめる</button></div>';
+ function done(t){load(CUR);document.getElementById("detail").innerHTML='<p class="empty">'+t+'</p>'}
+ document.getElementById("e-ok").onclick=function(){
+  USERFIX[o.key]={t:document.getElementById("e-t").value,b:document.getElementById("e-b").value.trim(),k:document.getElementById("e-k").value.trim(),d:document.getElementById("e-d").value.trim()};
+  done(saveFix()?"直しを保存しました。":"保存できませんでした。")};
+ document.getElementById("e-reset").onclick=function(){delete USERFIX[o.key];saveFix();done("元に戻しました。")};
+ document.getElementById("e-cancel").onclick=function(){show(o,b)}
+}
+function msg(t){document.getElementById("msg").textContent=t}
+function el(id){return document.getElementById(id)}
+function sanitizePoem(o){
+ if(!o||typeof o!=="object"||!Array.isArray(o.lines))return null;
+ var ruby=typeof o.ruby==="string"?o.ruby:(typeof o.text==="string"?o.text:"");
+ var plain=ruby.replace(/《[^》]*》/g,"").replace(/\s+/g,"");
+ var lines=[],joined="";
+ for(var i=0;i<o.lines.length;i++){var ln=o.lines[i];if(!Array.isArray(ln))return null;var row=[];
+  for(var j=0;j<ln.length;j++){var t=ln[j];if(!t||typeof t.s!=="string"||!t.s)return null;
+   var k={s:t.s,t:Object.prototype.hasOwnProperty.call(LABEL,t.t)?t.t:"o"};
+   ["b","k","d","review"].forEach(function(f){if(typeof t[f]==="string"&&t[f])k[f]=t[f]});
+   if(t.plain)k.plain=true;row.push(k);joined+=t.s}
+  lines.push(row)}
+ if(!lines.length||joined!==plain)return null;
+ return{author:(typeof o.author==="string"&&o.author)?o.author:"取り込み",text:plain,ruby:ruby,lines:lines,
+  tr:typeof o.tr==="string"?o.tr:"",gt:typeof o.gt==="string"?o.gt:"",grp:typeof o.grp==="string"?o.grp:"",kake:Array.isArray(o.kake)?o.kake.filter(function(x){return typeof x==="string"}):[]}}
+function nextId(){var n=USER.length+1;while(USER.some(function(u){return u.id==="自"+n}))n++;return"自"+n}
+function addUser(p){p.id=nextId();p.user=true;USER.push(p)}
+function finishAdd(i){var ok=saveUser();rebuild();renderNav();load(i==null?ALL.length-1:i);el("add").hidden=true;
+ if(!ok)alert("保存できませんでした。端末の保存領域がいっぱいかもしれません。")}
+function mk(text){var t=text.trim().replace(/[ \u3000\n]+/g," ");var plain=t.replace(/《[^》]*》/g,"");
+ return{text:plain.replace(/ /g,""),ruby:t,lines:plain.split(" ").filter(Boolean).map(function(s){return[{s:s,t:"n",plain:true}]})}}
+function clearForm(){["f-gt","f-author","f-text","f-tr","f-kake"].forEach(function(i){el(i).value=""});msg("")}
+function mode(){return document.querySelector('input[name="mode"]:checked').value}
+function setMode(){var s=mode()==="series";el("g-title-wrap").hidden=!s;el("kake-wrap").hidden=s;
+ el("l-text").textContent=s?"本文(1首を1行に。5句はスペースで区切る。ルビは 漢字《よみ》)":"本文(5句をスペースで区切る。ルビは 漢字《よみ》)";
+ el("l-tr").textContent=s?"現代語訳(1首ごとに1行。なくてもOK)":"現代語訳(あとで書いてもOK)"}
+Array.prototype.forEach.call(document.querySelectorAll('input[name="mode"]'),function(r){r.onchange=setMode});
+el("b-save").onclick=function(){
+ var author=el("f-author").value.trim()||"自作・メモ",raw=el("f-text").value;
+ if(mode()==="series"){
+  var title=el("f-gt").value.trim();if(!title){msg("連作の題を入れてください");return}
+  var rows=raw.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+  if(!rows.length){msg("本文を入れてください");return}
+  var trs=el("f-tr").value.split("\n"),gid="g"+Date.now(),first=ALL.length;
+  rows.forEach(function(r,i){var p=mk(r);p.author=author;p.tr=(trs[i]||"").trim();p.kake=[];p.gt=title;p.grp=gid;addUser(p)});
+  clearForm();finishAdd(first);return}
+ if(!raw.trim()){msg("本文を入れてください");return}
+ var p=mk(raw);p.author=author;p.tr=el("f-tr").value.trim();
+ p.kake=el("f-kake").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+ addUser(p);clearForm();finishAdd()};
+el("f-file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){el("f-json").value=r.result;msg("読み込みました。「取り込む」を押してください")};r.readAsText(f,"utf-8")};
+el("b-import").onclick=function(){
+ var data;try{data=JSON.parse(el("f-json").value)}catch(e){msg("JSONとして読めません");return}
+ if(!Array.isArray(data))data=[data];
+ var title=el("f-igt").value.trim(),gid="g"+Date.now(),gmap={},first=ALL.length,n=0,bad=0;
+ data.forEach(function(o){var p=sanitizePoem(o);if(!p){bad++;return}
+  if(title){p.gt=title;p.grp=gid}
+  else if(p.grp&&p.gt){if(!gmap[p.grp])gmap[p.grp]="g"+Date.now()+"_"+Object.keys(gmap).length;p.grp=gmap[p.grp]}
+  else{delete p.grp;delete p.gt}
+  addUser(p);n++});
+ if(!n){msg("取り込めませんでした(形式が違うか、本文と語の並びが合っていません)");return}
+ el("f-json").value="";el("f-igt").value="";msg(n+"首を取り込みました"+(bad?"("+bad+"首は形式が合わず除きました)":""));finishAdd(first)};
+el("b-export").onclick=function(){
+ if(!USER.length){msg("自分で足した歌がまだありません");return}
+ (navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(USER)):Promise.reject()).then(function(){msg(USER.length+"首ぶんをコピーしました。メモアプリなどに貼って保管してください")},function(){msg("コピーできませんでした")})};
+load(0);
 if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){navigator.serviceWorker.register("sw.js").catch(function(){})}
 </script>
 </body>

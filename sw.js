@@ -1,5 +1,5 @@
 // index.html などを変えたら、下の数字を上げる(例: v3)。古い保存が捨てられて新しくなる。
-const CACHE = "tanka-v2";
+const CACHE = "tanka-v6";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 const FONTS = ["./fonts/ShipporiMincho-Regular.ttf", "./fonts/ShipporiMincho-SemiBold.ttf"];
 
