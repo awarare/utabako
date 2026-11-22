@@ -97,7 +97,7 @@ h2{font-size:14px;font-weight:600;color:var(--sub);margin:0 0 4px}
 <div id="extra"></div>
 <p class="note">本文は陽明文庫旧蔵カルタ(底本)による。濁点・踊り字・ルビは補ったもの(下書き)。文法分解は中古和文UniDic(国立国語研究所、CC BY-NC-SA)の自動解析で、「手直し」の語は辞書の結果を直したもの(未確認)。意味は「AI下書き」で、人の確認前です。自分で足した歌は、この端末の中だけに保存されます。</p>
 <script>
-const POEMS=[];
+let POEMS=[];
 const FIX={};
 const MEANS={};
 const PART={};
@@ -108,7 +108,7 @@ function col(t){return"var(--"+t+")"}
 var btns=[],P=null;
 document.getElementById("legend").innerHTML=Object.keys(LABEL).map(function(k){return'<span style="--c:'+col(k)+'"><i></i>'+LABEL[k]+'</span>'}).join("");
 var nav=document.getElementById("nav");
-var USER=[],ALL=POEMS.slice(),SK="tanka_user_v1";
+var USER=[],ALL=[],SK="tanka_user_v1";
 try{USER=JSON.parse(localStorage.getItem(SK)||"[]")||[]}catch(e){USER=[]}
 var USERFIX={};try{USERFIX=JSON.parse(localStorage.getItem("tanka_fix_v1")||"{}")||{}}catch(e){USERFIX={}}
 function saveFix(){try{localStorage.setItem("tanka_fix_v1",JSON.stringify(USERFIX));return true}catch(e){return false}}
@@ -166,6 +166,7 @@ function load(pi){
    var key=P.id+"|"+tk.s;
    if(!fx){o.ai=MEANS[key]||(tk.t==="p"?PART[tk.s]:"")}
    o.key=P.id+":"+li+":"+ti;var uf=USERFIX[o.key];if(uf){Object.assign(o,uf);o.fixed=true;o.mine=true;o.review="";o.ai=""}
+   o._li=li;o._ti=ti;
    var bt=document.createElement("button");
    bt.className="tok"+(o.review?" rv":"");
    bt.style.setProperty("--c",col(o.t));bt.setAttribute("aria-pressed","false");
@@ -237,9 +238,81 @@ function show(o,b){
  if(o.ai)h+='<dt>この歌での意味(AI下書き)</dt><dd>'+esc(o.ai)+'</dd>';
  if(o.fixed)h+='<dt>手直し</dt><dd>'+(o.mine?'自分で直しました':'辞書の結果を直しました(未確認)')+'</dd>';
  if(o.review)h+='<dt>要確認</dt><dd>'+esc(o.review)+'</dd>';
- h+='</dl><div class="row"><button class="sm" id="b-edit">この語を直す</button></div>';
+ h+='</dl><div class="row"><button class="sm" id="b-edit">この語を直す</button>';
+ var line=P.lines[o._li]||[];
+ if(o._ti+1<line.length)h+='<button class="sm" id="b-merge">次の語とくっつける</button>';
+ if(o.s.length>=2)h+='<button class="sm" id="b-split">語を分ける</button>';
+ h+='</div>';
  var dt=document.getElementById("detail");dt.innerHTML=h;
  document.getElementById("b-edit").onclick=function(){editForm(o,b)};
+ var mb=document.getElementById("b-merge");if(mb)mb.onclick=function(){mergeToken(o._li,o._ti)};
+ var sb=document.getElementById("b-split");if(sb)sb.onclick=function(){splitForm(o)};
+}
+function ensureEditablePoem(){
+ if(P.user)return;
+ var idxInPoems=POEMS.indexOf(P);
+ var clone=JSON.parse(JSON.stringify(P));
+ delete clone._li;delete clone._ti;
+ clone.user=true;
+ if(!clone.id)clone.id=nextId();
+ if(idxInPoems>=0)POEMS.splice(idxInPoems,1);
+ USER.push(clone);
+ P=clone;
+ CUR=POEMS.length+USER.length-1;
+ rebuild();renderNav();
+}
+function clearLineUserFix(poemId,li){
+ var prefix=poemId+":"+li+":";
+ Object.keys(USERFIX).forEach(function(k){if(k.indexOf(prefix)===0)delete USERFIX[k]});
+ saveFix();
+}
+function mergeToken(li,ti){
+ var line=P.lines[li];
+ if(!line||ti<0||ti+1>=line.length)return;
+ ensureEditablePoem();
+ var a=line[ti],b=line[ti+1];
+ var merged={s:(a.s||"")+(b.s||""),t:a.t||"n"};
+ if(a.b)merged.b=a.b;
+ if(a.k)merged.k=a.k;
+ if(a.d||b.d)merged.d=[a.d,b.d].filter(Boolean).join(" / ");
+ line.splice(ti,2,merged);
+ clearLineUserFix(P.id,li);
+ if(!saveUser())alert("保存できませんでした。端末の保存領域がいっぱいかもしれません。");
+ load(CUR);
+ document.getElementById("detail").innerHTML='<p class="empty">「'+esc(merged.s)+'」にくっつけました。</p>';
+}
+function splitForm(o){
+ var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+'>'+LABEL[k]+'</option>'}).join("");
+ var maxCut=o.s.length-1;
+ var dt=document.getElementById("detail");
+ dt.innerHTML='<div class="w">'+esc(o.s)+'</div>'
+  +'<label for="sp-cut">前半の文字数(1〜'+maxCut+')</label>'
+  +'<input id="sp-cut" type="number" min="1" max="'+maxCut+'" value="1">'
+  +'<label for="sp-t2">後半の品詞</label>'
+  +'<select id="sp-t2">'+opts+'</select>'
+  +'<div class="row"><button class="sm" id="sp-ok">分ける</button><button class="sm" id="sp-cancel">やめる</button></div>';
+ document.getElementById("sp-ok").onclick=function(){
+  var cut=parseInt(document.getElementById("sp-cut").value,10);
+  if(isNaN(cut)||cut<1||cut>maxCut){document.getElementById("sp-cut").focus();return}
+  var t2=document.getElementById("sp-t2").value;
+  var line=P.lines[o._li];if(!line)return;
+  ensureEditablePoem();
+  var target=line[o._ti];
+  var s1=target.s.slice(0,cut),s2=target.s.slice(cut);
+  var p1={s:s1,t:target.t||"n"};
+  if(target.b)p1.b=target.b;
+  if(target.k)p1.k=target.k;
+  var p2={s:s2,t:t2};
+  line.splice(o._ti,1,p1,p2);
+  clearLineUserFix(P.id,o._li);
+  if(!saveUser())alert("保存できませんでした。端末の保存領域がいっぱいかもしれません。");
+  load(CUR);
+  document.getElementById("detail").innerHTML='<p class="empty">「'+esc(s1)+'」と「'+esc(s2)+'」に分けました。</p>';
+ };
+ document.getElementById("sp-cancel").onclick=function(){
+  var btn=btns[CUR>=0?0:0];
+  load(CUR);
+ };
 }
 function editForm(o,b){
  var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+'>'+LABEL[k]+'</option>'}).join("");
