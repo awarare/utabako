@@ -15,18 +15,23 @@
 @font-face{font-family:"Shippori Mincho";src:url("fonts/ShipporiMincho-SemiBold.ttf") format("truetype");font-weight:600;font-display:swap}
 :root{--bg:#eceff4;--ink:#1c2333;--sub:#5a6479;--line:#c9d0de;--panel:#f8f9fc;
 --n:#6b7385;--v:#2f55a4;--aux:#b2432e;--p:#2f7456;--adj:#7b4a9c;--o:#8a7a3a;
+--pron:#4b6cb7;--adv:#2d7d7b;--adn:#8c583a;--conj:#5b6abf;--intj:#b04b78;--pref:#5c7a3e;--suf:#3e7a6b;--auxv:#9c462f;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a28;--ink:#e6eaf4;--sub:#9aa5bd;--line:#2d3750;--panel:#1b2336;
---n:#9aa3b8;--v:#7ea3ec;--aux:#ef8a74;--p:#6fc79c;--adj:#c79be6;--o:#d6c27a}}
+--n:#9aa3b8;--v:#7ea3ec;--aux:#ef8a74;--p:#6fc79c;--adj:#c79be6;--o:#d6c27a;
+--pron:#8aa6e8;--adv:#68c4c1;--adn:#d49b79;--conj:#94a2f0;--intj:#e88ab4;--pref:#9ec476;--suf:#74c4b0;--auxv:#e3866b}}
 *{box-sizing:inherit}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;line-height:1.8;max-width:480px;margin:0 auto;padding:20px 20px 40px}
-h1{font-size:15px;font-weight:600;color:var(--sub);margin:0 0 10px}
-.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
-.nav button{font:inherit;font-size:14px;min-width:38px;padding:3px 8px;border:1px solid var(--line);border-radius:16px;background:none;color:var(--ink);cursor:pointer}
-.nav button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+body{font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;line-height:1.8;max-width:480px;margin:0 auto;padding:20px 20px 48px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+h1{font-size:15px;font-weight:600;color:var(--sub);margin:0}
+.top-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.pager-info{font-size:13px;color:var(--sub);text-align:center;flex:1}
+.series-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--sub);margin:0 0 8px}
+.subhead{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.04em;margin:0 0 6px;padding:4px 10px;border-left:3px solid var(--line);background:color-mix(in srgb,var(--panel) 75%,transparent);border-radius:0 6px 6px 0}
 .meta{font-size:13px;color:var(--sub);margin:0 0 12px}
-.poem{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:16px}
+.poem{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:16px}
 .line{display:flex;flex-wrap:wrap;align-items:flex-end;gap:2px;margin:10px 0}
 .tok{position:relative;font:inherit;font-size:26px;color:var(--ink);background:none;border:0;border-bottom:3px solid var(--c);padding:2px 3px;cursor:pointer;line-height:1.5;border-radius:2px}
 .tok[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 18%,transparent)}
@@ -43,39 +48,54 @@ rt{font-size:10px;color:var(--sub);line-height:1.2}
 .detail dd{margin:0}
 .empty{color:var(--sub);font-size:14px;margin:0}
 h2{font-size:14px;font-weight:600;color:var(--sub);margin:0 0 4px}
+.tr-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.tr-head h2{margin:0}
 .tr{font-size:17px;margin:0 0 16px}
 .kake{font-size:14px;margin:0 0 16px;padding-left:1.2em}
 .note{font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:12px}
-#add[hidden]{display:none}
-#add{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--panel)}
-#add label{display:block;font-size:12px;color:var(--sub);margin:8px 0 2px}
-#add input,#add textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+#add[hidden],#toc[hidden]{display:none}
+#add,#toc{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px;background:var(--panel)}
+#add label,#toc label{display:block;font-size:12px;color:var(--sub);margin:8px 0 2px}
+#add input,#add textarea,#toc select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
 #add button,.sm{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--ink);border-radius:8px;background:none;color:var(--ink);cursor:pointer}
-#add .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-#add .hint{font-size:12px;color:var(--sub);margin:0 0 4px}
-#add h2{margin-top:14px}
+.sm.xs{font-size:12px;padding:2px 8px;border-color:var(--line)}
+.sm:disabled{opacity:.35;cursor:default}
+#add .row,#toc .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#add .hint,#toc .hint{font-size:12px;color:var(--sub);margin:0 0 4px}
+#add h2,#toc h2{margin-top:14px}
+#add h2:first-child,#toc h2:first-child{margin-top:0}
 .msg{font-size:13px;color:var(--aux);min-height:1.5em;margin:0}
 .detail label{display:block;font-size:12px;color:var(--sub);margin:6px 0 2px}
 .detail input,.detail textarea,.detail select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
 .detail .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-.sm{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--ink);border-radius:8px;background:none;color:var(--ink);cursor:pointer}
 #check{font-size:14px;margin-bottom:20px}#check ul{padding-left:1.2em;margin:4px 0;list-style:none}#check li{margin:3px 0}
 #add .modes label{display:inline-flex;gap:5px;align-items:center;margin:0 14px 0 0;font-size:14px;color:var(--ink)}
 #add .modes input{width:auto}
-#series{align-items:center;font-size:13px;color:var(--sub)}
 #extra label{display:block;font-size:12px;color:var(--sub);margin:6px 0 2px}
 #extra textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
 #extra .row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 </style>
 </head>
 <body>
-<h1>歌筥</h1>
-<div class="nav" id="nav"></div>
-<div class="nav" id="series" style="display:none"></div>
+<div class="topbar">
+  <h1>歌筥</h1>
+  <div class="top-actions">
+    <button type="button" class="sm xs" id="b-toc">目次</button>
+    <button type="button" class="sm xs" id="b-add" aria-label="歌を足す" aria-expanded="false">＋</button>
+  </div>
+</div>
+<section id="toc" hidden>
+  <h2>目次・連作・小タイトル</h2>
+  <p class="hint">歌集のように一首ずつめくりつつ、連作や小タイトル（見出し）からすぐ移動できます。</p>
+  <label for="sel-jump">連作・小タイトルから選ぶ</label>
+  <select id="sel-jump"></select>
+  <div class="row" id="toc-chips"></div>
+</section>
 <section id="add" hidden>
 <h2>歌を足す(この端末の中だけに保存されます)</h2>
 <div class="modes"><label><input type="radio" name="mode" value="one" checked> 単作</label><label><input type="radio" name="mode" value="series"> 連作</label></div>
 <div id="g-title-wrap" hidden><label for="f-gt">連作の題</label><input id="f-gt"></div>
+<label for="f-sub">小タイトル(途中に見出しを入れるとき)</label><input id="f-sub" placeholder="例: 宵の夢 / 冬のあかり">
 <label for="f-author">作者(なければ空でOK)</label><input id="f-author">
 <label for="f-text" id="l-text">本文(5句をスペースで区切る。ルビは 漢字《よみ》)</label><textarea id="f-text" rows="4"></textarea>
 <label for="f-tr" id="l-tr">現代語訳(あとで書いてもOK)</label><textarea id="f-tr" rows="3"></textarea>
@@ -87,8 +107,19 @@ h2{font-size:14px;font-weight:600;color:var(--sub);margin:0 0 4px}
 <label for="f-igt">連作として取り込むなら、連作の題(空なら単作)</label><input id="f-igt">
 <label for="f-json">または、JSONをここに貼り付け</label><textarea id="f-json" rows="3"></textarea>
 <div class="row"><button id="b-import">取り込む</button><button id="b-export">自分の歌をコピー(バックアップ)</button></div>
+<h2>現代語訳をまとめて流し込む</h2>
+<p class="hint">コードを書かなくても、「番号[タブ]現代語訳」を1行ずつ貼るだけで、歌の id（または番号）に合わせて現代語訳を入れられます。</p>
+<label for="f-tr-bulk">現代語訳リスト(例: 1	夜のとばりの中で...)</label><textarea id="f-tr-bulk" rows="4"></textarea>
+<div class="row"><button id="b-tr-apply">現代語訳を反映する</button></div>
 <p class="msg" id="msg" aria-live="polite"></p>
 </section>
+<div class="pager">
+  <button type="button" class="sm xs" id="b-prev">‹ 前へ</button>
+  <span class="pager-info" id="pager-info"></span>
+  <button type="button" class="sm xs" id="b-next">次へ ›</button>
+</div>
+<div class="series-bar" id="series" style="display:none"></div>
+<p class="subhead" id="subhead" style="display:none"></p>
 <p class="meta" id="meta"></p>
 <div class="poem" id="poem"></div>
 <div class="legend" id="legend"></div>
@@ -102,27 +133,96 @@ const FIX={};
 const MEANS={};
 const PART={};
 const META={};
-const LABEL={n:"名詞",v:"動詞",aux:"助動詞",p:"助詞",adj:"形容詞・形状詞",o:"その他"};
+const LABEL={
+  n:"名詞",
+  pron:"代名詞",
+  v:"動詞",
+  adj:"形容詞・形状詞",
+  adn:"連体詞",
+  adv:"副詞",
+  conj:"接続詞",
+  intj:"感動詞",
+  aux:"助動詞",
+  auxv:"助動詞相当",
+  p:"助詞",
+  pref:"接頭辞",
+  suf:"接尾辞",
+  o:"その他"
+};
 function esc(x){return String(x).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
-function col(t){return"var(--"+t+")"}
+function col(t){return Object.prototype.hasOwnProperty.call(LABEL,t)?"var(--"+t+")":"var(--o)"}
 var btns=[],P=null;
 document.getElementById("legend").innerHTML=Object.keys(LABEL).map(function(k){return'<span style="--c:'+col(k)+'"><i></i>'+LABEL[k]+'</span>'}).join("");
-var nav=document.getElementById("nav");
 var USER=[],ALL=[],SK="tanka_user_v1";
 try{USER=JSON.parse(localStorage.getItem(SK)||"[]")||[]}catch(e){USER=[]}
+var HIDE_TR=false;
+try{HIDE_TR=localStorage.getItem("tanka_hide_tr")==="1"}catch(e){HIDE_TR=false}
+function saveHideTr(){try{localStorage.setItem("tanka_hide_tr",HIDE_TR?"1":"0")}catch(e){}}
 var USERFIX={};try{USERFIX=JSON.parse(localStorage.getItem("tanka_fix_v1")||"{}")||{}}catch(e){USERFIX={}}
 function saveFix(){try{localStorage.setItem("tanka_fix_v1",JSON.stringify(USERFIX));return true}catch(e){return false}}
 function saveUser(){try{localStorage.setItem(SK,JSON.stringify(USER));return true}catch(e){return false}}
 function rebuild(){ALL=POEMS.concat(USER)}
-function navItems(all){var seen={},out=[];
- all.forEach(function(p,i){if(p.grp){if(seen[p.grp])return;seen[p.grp]=1;out.push({label:p.gt||"連作",i:i,grp:p.grp})}else out.push({label:p.id,i:i})});return out}
+function subOf(p){
+ if(!p||typeof p!=="object")return"";
+ return String(p.sub||p.subtitle||p.heading||p.section||"").trim();
+}
 function membersOf(all,g){var r=[];all.forEach(function(q,i){if(q.grp===g)r.push(i)});return r}
-function renderNav(){nav.innerHTML="";
- navItems(ALL).forEach(function(it){var b=document.createElement("button");b.textContent=it.label;b.setAttribute("aria-pressed","false");
-  if(it.grp)b.dataset.grp=it.grp;else b.dataset.i=it.i;b.onclick=function(){load(it.i)};nav.appendChild(b)});
- var pb=document.createElement("button");pb.textContent="＋";pb.setAttribute("aria-label","歌を足す");pb.setAttribute("aria-pressed","false");
- pb.onclick=function(){var a=document.getElementById("add");a.hidden=!a.hidden};nav.appendChild(pb)}
+function renderToc(){
+ var sel=document.getElementById("sel-jump"),chips=document.getElementById("toc-chips");
+ if(!sel||!chips)return;
+ sel.innerHTML="";chips.innerHTML="";
+ if(!ALL.length){
+  var op=document.createElement("option");op.value="";op.textContent="歌がありません";sel.appendChild(op);
+  chips.innerHTML='<span class="empty">まだ見出しや連作はありません。</span>';
+  return;
+ }
+ var seenGrp={},entries=[];
+ ALL.forEach(function(p,i){
+  if(p.grp&&!seenGrp[p.grp]){
+   seenGrp[p.grp]=1;
+   entries.push({label:"連作：" + (p.gt||"無題") + "（" + (i+1) + "首目〜）",idx:i,kind:"grp"});
+  }
+  var sb=subOf(p);
+  if(sb){
+   var prefix=p.grp?(p.gt+" / "):"";
+   entries.push({label:"小タイトル：" + prefix + sb + "（" + (i+1) + "首目〜）",idx:i,kind:"sub"});
+  }
+ });
+ if(!entries.length){
+  ALL.forEach(function(p,i){
+   var label=(p.id?p.id+"：":"") + ((p.text||"").slice(0,12)||((i+1)+"首目"));
+   entries.push({label:label,idx:i,kind:"poem"});
+  });
+ }
+ entries.forEach(function(ent){
+  var opt=document.createElement("option");
+  opt.value=String(ent.idx);
+  opt.textContent=ent.label;
+  sel.appendChild(opt);
+  var b=document.createElement("button");
+  b.type="button";
+  b.className="sm xs";
+  b.textContent=ent.label;
+  b.onclick=function(){load(ent.idx);document.getElementById("toc").hidden=true};
+  chips.appendChild(b);
+ });
+ sel.onchange=function(){
+  var v=parseInt(this.value,10);
+  if(!isNaN(v)){load(v);document.getElementById("toc").hidden=true}
+ };
+}
+function renderNav(){renderToc()}
 rebuild();renderNav();
+document.getElementById("b-toc").onclick=function(){
+ var t=document.getElementById("toc");
+ t.hidden=!t.hidden;
+ if(!t.hidden)renderToc();
+};
+document.getElementById("b-add").onclick=function(){
+ var a=document.getElementById("add");
+ a.hidden=!a.hidden;
+ this.setAttribute("aria-expanded",a.hidden?"false":"true");
+};
 function parseRuby(s){var runs=[],plain="",re=/([\u4E00-\u9FFF々]+)《([^》]+)》|(\S)|(\s+)/g,m;
  while((m=re.exec(s))){if(m[1]){runs.push({a:plain.length,b:plain.length+m[1].length,r:m[2]});plain+=m[1]}else if(m[3])plain+=m[3]}
  return runs}
@@ -132,13 +232,75 @@ function fill(btn,s,a,b,runs){var h="",i=0;
   var inside=r.a>=a&&r.b<=b,covered=a>=r.a&&b<=r.b;
   var e=Math.min(r.b,b)-a;
   var chunk=esc(s.slice(i,e));
-  h+=covered&&!inside?chunk:'<ruby>'+chunk+'<rt>'+esc(r.r)+'</rt></ruby>';
+  h+=covered&&!inside?chunk:"<ruby>"+chunk+"<rt>"+esc(r.r)+"</rt></ruby>";
   i=e}
  btn.innerHTML=h}
 var CUR=0;
+function updatePager(){
+ var prev=document.getElementById("b-prev"),next=document.getElementById("b-next"),info=document.getElementById("pager-info");
+ if(!ALL.length){
+  prev.disabled=true;next.disabled=true;info.textContent="0 / 0";return;
+ }
+ prev.disabled=(CUR<=0);
+ next.disabled=(CUR>=ALL.length-1);
+ var idPart=(P&&P.id!==undefined&&String(P.id).trim()!=="")?("第"+P.id+"首 ・ "):"";
+ info.textContent=idPart+(CUR+1)+" / "+ALL.length;
+}
+document.getElementById("b-prev").onclick=function(){if(CUR>0)load(CUR-1)};
+document.getElementById("b-next").onclick=function(){if(CUR<ALL.length-1)load(CUR+1)};
+document.addEventListener("keydown",function(e){
+ var tag=e.target&&e.target.tagName;
+ if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
+ if(e.key==="ArrowLeft"&&CUR>0){e.preventDefault();load(CUR-1)}
+ else if(e.key==="ArrowRight"&&CUR<ALL.length-1){e.preventDefault();load(CUR+1)}
+});
+function renderExtra(poem){
+ var m=META[poem.id]||((poem.tr||(poem.kake&&poem.kake.length))?{tr:poem.tr||"",kake:(poem.kake&&poem.kake.length)?poem.kake:null,own:true}:null);
+ var hasTr=!!(m&&m.tr);
+ var html="";
+ if(m){
+  html+='<div class="tr-head"><h2>'+(m.own?"現代語訳":"現代語訳(AI下書き・未確認)")+"</h2>";
+  if(hasTr)html+='<button type="button" class="sm xs" id="b-toggle-tr">'+(HIDE_TR?"訳を見る":"訳を隠す")+"</button>";
+  html+="</div>";
+  if(hasTr){
+   html+=HIDE_TR?'<p class="empty">（隠しています）</p>':'<p class="tr">'+esc(m.tr)+"</p>";
+  }else{
+   html+='<p class="empty">現代語訳はまだ入っていません。</p>';
+  }
+  if(m.kake)html+="<h2>掛詞</h2><ul class=\"kake\">"+m.kake.map(function(k){return"<li>"+esc(k)+"</li>"}).join("")+"</ul>";
+ }else{
+  html+='<p class="empty">現代語訳・修辞法は、これから足します。</p>';
+ }
+ document.getElementById("extra").innerHTML=html;
+ var tb=document.getElementById("b-toggle-tr");
+ if(tb)tb.onclick=function(){HIDE_TR=!HIDE_TR;saveHideTr();renderExtra(poem);attachUserActions(poem)};
+}
+function attachUserActions(poem){
+ if(!poem.user)return;
+ var ex=document.getElementById("extra");
+ ex.insertAdjacentHTML("beforeend",'<div class="row"><button id="b-edt" class="sm">訳・メモ・見出しを直す</button><button id="b-del" class="sm">この歌を消す</button>'+(poem.grp?'<button id="b-delg" class="sm">連作ごと消す</button>':"")+"</div>");
+ document.getElementById("b-edt").onclick=function(){
+  ex.innerHTML='<label for="x-sub">小タイトル(見出し)</label><input id="x-sub">'
+   +'<label for="x-tr">現代語訳</label><textarea id="x-tr" rows="3"></textarea>'
+   +'<label for="x-kake">掛詞などのメモ(1行に1つ)</label><textarea id="x-kake" rows="3"></textarea>'
+   +'<div class="row"><button class="sm" id="x-ok">保存</button><button class="sm" id="x-no">やめる</button></div>';
+  document.getElementById("x-sub").value=subOf(poem);
+  document.getElementById("x-tr").value=poem.tr||"";
+  document.getElementById("x-kake").value=(poem.kake||[]).join("\n");
+  document.getElementById("x-ok").onclick=function(){
+   poem.sub=document.getElementById("x-sub").value.trim();
+   poem.tr=document.getElementById("x-tr").value.trim();
+   poem.kake=document.getElementById("x-kake").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
+   saveUser();renderToc();load(CUR)};
+  document.getElementById("x-no").onclick=function(){load(CUR)}};
+ document.getElementById("b-del").onclick=function(){if(confirm("この歌を消しますか？")){USER=USER.filter(function(u){return u!==poem});saveUser();rebuild();renderNav();load(0)}};
+ if(poem.grp)document.getElementById("b-delg").onclick=function(){if(confirm("連作「"+poem.gt+"」を全部消しますか？")){var g=poem.grp;USER=USER.filter(function(u){return u.grp!==g});saveUser();rebuild();renderNav();load(0)}}
+}
 function load(pi){
  if(!ALL.length){P=null;CUR=0;btns=[];
+  updatePager();
   document.getElementById("series").style.display="none";
+  document.getElementById("subhead").style.display="none";
   document.getElementById("meta").textContent="";
   document.getElementById("poem").innerHTML='<p class="empty">まだ歌がありません。右上の「＋」から歌を足すか、JSONを取り込んでね。</p>';
   document.getElementById("detail").innerHTML='<p class="empty">語をタップすると、品詞と活用が出ます。「?」は要確認の語です。</p>';
@@ -147,14 +309,17 @@ function load(pi){
   return}
  if(pi<0||pi>=ALL.length)pi=0;
  P=ALL[pi];CUR=pi;btns=[];var allTok=[];
- Array.prototype.forEach.call(nav.children,function(c){var on=c.dataset.grp?(c.dataset.grp===P.grp):(c.dataset.i!==undefined&&+c.dataset.i===pi);c.setAttribute("aria-pressed",on?"true":"false")});
+ updatePager();
  var sb=document.getElementById("series"),gtxt="";
- if(P.grp){var mem=membersOf(ALL,P.grp);sb.style.display="flex";sb.innerHTML="";
-  var lab=document.createElement("span");lab.textContent="連作「"+P.gt+"」";sb.appendChild(lab);
-  mem.forEach(function(gi,n){var c=document.createElement("button");c.textContent=n+1;c.setAttribute("aria-pressed",gi===pi?"true":"false");c.onclick=function(){load(gi)};sb.appendChild(c)});
-  gtxt=" ・ "+P.gt+" "+(mem.indexOf(pi)+1)+"/"+mem.length}
- else{sb.style.display="none";sb.innerHTML=""}
- document.getElementById("meta").textContent=P.author+(/^\d+$/.test(P.id)?" ・ 百人一首"+P.id+"番":"")+gtxt;
+ if(P.grp){
+  sb.style.display="flex";
+  sb.innerHTML='<span>連作「'+esc(P.gt||"無題")+"」</span>";
+  gtxt=" ・ "+(P.gt||"無題");
+ }else{sb.style.display="none";sb.innerHTML=""}
+ var sh=document.getElementById("subhead"),subVal=subOf(P);
+ if(subVal){sh.style.display="block";sh.textContent=subVal}
+ else{sh.style.display="none";sh.textContent=""}
+ document.getElementById("meta").textContent=(P.author||"")+gtxt;
  document.getElementById("detail").innerHTML='<p class="empty">語をタップすると、品詞と活用が出ます。「?」は要確認の語です。</p>';
  var runs=parseRuby(P.ruby),off=0,poem=document.getElementById("poem");poem.innerHTML="";
  P.lines.forEach(function(line,li){
@@ -184,41 +349,31 @@ function load(pi){
   poem.appendChild(row);
  });
  renderCheck(allTok);
- var m=META[P.id]||((P.tr||(P.kake&&P.kake.length))?{tr:P.tr||"",kake:(P.kake&&P.kake.length)?P.kake:null,own:true}:null);
- document.getElementById("extra").innerHTML=m?'<h2>'+(m.own?'現代語訳':'現代語訳(AI下書き・未確認)')+'</h2><p class="tr">'+esc(m.tr)+'</p>'+(m.kake?'<h2>掛詞</h2><ul class="kake">'+m.kake.map(function(k){return"<li>"+esc(k)+"</li>"}).join("")+'</ul>':''):'<p class="empty">修辞法は、これから足します。</p>';
- if(P.user){var ex=document.getElementById("extra");
-  ex.insertAdjacentHTML("beforeend",'<div class="row"><button id="b-edt" class="sm">訳・メモを直す</button><button id="b-del" class="sm">この歌を消す</button>'+(P.grp?'<button id="b-delg" class="sm">連作ごと消す</button>':'')+'</div>');
-  document.getElementById("b-edt").onclick=function(){
-   ex.innerHTML='<label for="x-tr">現代語訳</label><textarea id="x-tr" rows="3"></textarea><label for="x-kake">掛詞などのメモ(1行に1つ)</label><textarea id="x-kake" rows="3"></textarea><div class="row"><button class="sm" id="x-ok">保存</button><button class="sm" id="x-no">やめる</button></div>';
-   document.getElementById("x-tr").value=P.tr||"";document.getElementById("x-kake").value=(P.kake||[]).join("\n");
-   document.getElementById("x-ok").onclick=function(){P.tr=document.getElementById("x-tr").value.trim();
-    P.kake=document.getElementById("x-kake").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);saveUser();load(CUR)};
-   document.getElementById("x-no").onclick=function(){load(CUR)}};
-  document.getElementById("b-del").onclick=function(){if(confirm("この歌を消しますか？")){USER=USER.filter(function(u){return u!==P});saveUser();rebuild();renderNav();load(0)}};
-  if(P.grp)document.getElementById("b-delg").onclick=function(){if(confirm("連作「"+P.gt+"」を全部消しますか？")){var g=P.grp;USER=USER.filter(function(u){return u.grp!==g});saveUser();rebuild();renderNav();load(0)}}}
+ renderExtra(P);
+ attachUserActions(P);
 }
 var FORMS=["未然形","連用形","終止形","連体形","已然形","命令形"];
 var REQ={"ず":["未然形"],"む":["未然形"],"むず":["未然形"],"じ":["未然形"],"まし":["未然形"],"る":["未然形"],"らる":["未然形"],"す":["未然形"],"さす":["未然形"],"しむ":["未然形"],"まほし":["未然形"],"き":["連用形"],"けり":["連用形"],"つ":["連用形"],"ぬ":["連用形"],"たり":["連用形"],"けむ":["連用形"],"たし":["連用形"],"らむ":["終止形"],"らし":["終止形"],"べし":["終止形"],"まじ":["終止形"],"めり":["終止形"],"なり":["終止形","連体形"],"り":["已然形","命令形"]};
 var PREQ={"て":["連用形"],"つつ":["連用形"],"ど":["已然形"],"ども":["已然形"],"ば":["未然形","已然形"]};
-function formOf(t){if(!t||(t.t!=="v"&&t.t!=="adj"&&t.t!=="aux"))return"";var f=(t.k||"").split("・").pop();return FORMS.indexOf(f)>=0?f:""}
+function formOf(t){if(!t||(t.t!=="v"&&t.t!=="adj"&&t.t!=="aux"&&t.t!=="auxv"))return"";var f=(t.k||"").split("・").pop();return FORMS.indexOf(f)>=0?f:""}
 function has(t,s){return(t.k||"").indexOf(s)>=0}
 function runChecks(toks){var out=[];
  for(var i=1;i<toks.length;i++){var c=toks[i],p=toks[i-1],pf=formOf(p);if(!pf)continue;var need=null;
-  if(c.t==="aux"&&REQ[c.b]){if(c.b==="なり"&&formOf(c)==="連用形")continue;need=REQ[c.b]}
+  if((c.t==="aux"||c.t==="auxv")&&REQ[c.b]){if(c.b==="なり"&&formOf(c)==="連用形")continue;need=REQ[c.b]}
   else if(c.t==="p"&&PREQ[c.s]&&has(c,"接続助詞")){need=PREQ[c.s]}
   if(!need)continue;
   var ok=need.indexOf(pf)>=0;
   if(!ok&&pf==="連体形"&&has(p,"ラ行変格")&&need.indexOf("終止形")>=0)ok=true;
   var exc="";
   if(!ok&&c.b==="き"&&pf==="未然形"&&(has(p,"サ行変格")||has(p,"カ行変格"))){ok=true;exc="サ変・カ変は未然形に付く例外。"}
-  var nm="「"+c.s+"」"+(c.t==="aux"?"(「"+c.b+"」)":"");
+  var nm="「"+c.s+"」"+((c.t==="aux"||c.t==="auxv")?"(「"+c.b+"」)":"");
   out.push({ok:ok,text:ok?"「"+p.s+"」("+pf+") + "+nm+": "+(exc||need.join("か")+"に付く。")+"合っています。"
    :"「"+p.s+"」は"+pf+"ですが、"+nm+"は"+need.join("か")+"に付くのが普通です。"})}
  for(var j=0;j<toks.length;j++){var k=toks[j];if(k.t!=="p")continue;var exp=null;
   if(k.s==="こそ")exp="已然形";else if((k.s==="ぞ"||k.s==="なむ"||k.s==="や"||k.s==="か")&&has(k,"係助詞"))exp="連体形";
   if(!exp)continue;var a=-1;
   for(var m=j+1;m<toks.length;m++){if(formOf(toks[m])){a=m;break}}
-  if(a<0)continue;var z=a;while(z+1<toks.length&&toks[z+1].t==="aux"&&formOf(toks[z+1]))z++;
+  if(a<0)continue;var z=a;while(z+1<toks.length&&(toks[z+1].t==="aux"||toks[z+1].t==="auxv")&&formOf(toks[z+1]))z++;
   var zf=formOf(toks[z]);
   out.push({ok:zf===exp,text:zf===exp?"係り結び: 「"+k.s+"」の結び「"+toks[z].s+"」は"+exp+"。合っています。"
    :"係り結び: 「"+k.s+"」の結びは"+exp+"のはずですが、「"+toks[z].s+"」は"+zf+"です。"})}
@@ -226,23 +381,24 @@ function runChecks(toks){var out=[];
 function renderCheck(toks){var box=document.getElementById("check");
  if(toks.length&&toks[0].plain){box.innerHTML="";return}
  var r=runChecks(toks);
- box.innerHTML='<h2>文法チェック(目安)</h2>'+(r.length?'<ul>'+r.map(function(x){return'<li>'+(x.ok?'✔ ':'⚠ ')+esc(x.text)+'</li>'}).join("")+'</ul>':'<p class="empty">確認できる接続はありません。</p>')
+ box.innerHTML="<h2>文法チェック(目安)</h2>"+(r.length?"<ul>"+r.map(function(x){return"<li>"+(x.ok?"✔ ":"⚠ ")+esc(x.text)+"</li>"}).join("")+"</ul>":'<p class="empty">確認できる接続はありません。</p>')
   +'<p class="note" style="border:0;padding:0">辞書の分解が違っていると、ここも違って出ます。語を直すと、結果も変わります。</p>'}
 function show(o,b){
  btns.forEach(function(x){x.setAttribute("aria-pressed","false")});
  b.setAttribute("aria-pressed","true");
  if(o.plain){document.getElementById("detail").innerHTML='<p class="empty">この歌には文法の分解がありません。パソコンの analyze.py で分解したJSONを取り込むと、語ごとに見られます。</p>';return}
- var h='<div class="w">'+esc(o.s)+'</div><div class="pos" style="--c:'+col(o.t)+'">'+LABEL[o.t]+(o.k?"("+esc(o.k)+")":"")+'</div><dl>';
- if(o.b)h+='<dt>原形</dt><dd>'+esc(o.b)+'</dd>';
- if(o.d)h+='<dt>'+(o.fixed?'意味':'意味の候補')+'</dt><dd>'+esc(o.d)+'</dd>';
- if(o.ai)h+='<dt>この歌での意味(AI下書き)</dt><dd>'+esc(o.ai)+'</dd>';
- if(o.fixed)h+='<dt>手直し</dt><dd>'+(o.mine?'自分で直しました':'辞書の結果を直しました(未確認)')+'</dd>';
- if(o.review)h+='<dt>要確認</dt><dd>'+esc(o.review)+'</dd>';
+ var posLabel=LABEL[o.t]||LABEL.o;
+ var h='<div class="w">'+esc(o.s)+'</div><div class="pos" style="--c:'+col(o.t)+'">'+posLabel+(o.k?"("+esc(o.k)+")":"")+"</div><dl>";
+ if(o.b)h+="<dt>原形</dt><dd>"+esc(o.b)+"</dd>";
+ if(o.d)h+="<dt>"+(o.fixed?"意味":"意味の候補")+"</dt><dd>"+esc(o.d)+"</dd>";
+ if(o.ai)h+="<dt>この歌での意味(AI下書き)</dt><dd>"+esc(o.ai)+"</dd>";
+ if(o.fixed)h+="<dt>手直し</dt><dd>"+(o.mine?"自分で直しました":"辞書の結果を直しました(未確認)")+"</dd>";
+ if(o.review)h+="<dt>要確認</dt><dd>"+esc(o.review)+"</dd>";
  h+='</dl><div class="row"><button class="sm" id="b-edit">この語を直す</button>';
  var line=P.lines[o._li]||[];
  if(o._ti+1<line.length)h+='<button class="sm" id="b-merge">次の語とくっつける</button>';
  if(o.s.length>=2)h+='<button class="sm" id="b-split">語を分ける</button>';
- h+='</div>';
+ h+="</div>";
  var dt=document.getElementById("detail");dt.innerHTML=h;
  document.getElementById("b-edit").onclick=function(){editForm(o,b)};
  var mb=document.getElementById("b-merge");if(mb)mb.onclick=function(){mergeToken(o._li,o._ti)};
@@ -282,14 +438,14 @@ function mergeToken(li,ti){
  document.getElementById("detail").innerHTML='<p class="empty">「'+esc(merged.s)+'」にくっつけました。</p>';
 }
 function splitForm(o){
- var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+'>'+LABEL[k]+'</option>'}).join("");
+ var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+">"+LABEL[k]+"</option>"}).join("");
  var maxCut=o.s.length-1;
  var dt=document.getElementById("detail");
  dt.innerHTML='<div class="w">'+esc(o.s)+'</div>'
-  +'<label for="sp-cut">前半の文字数(1〜'+maxCut+')</label>'
+  +'<label for="sp-cut">前半の文字数(1〜'+maxCut+")</label>"
   +'<input id="sp-cut" type="number" min="1" max="'+maxCut+'" value="1">'
   +'<label for="sp-t2">後半の品詞</label>'
-  +'<select id="sp-t2">'+opts+'</select>'
+  +'<select id="sp-t2">'+opts+"</select>"
   +'<div class="row"><button class="sm" id="sp-ok">分ける</button><button class="sm" id="sp-cancel">やめる</button></div>';
  document.getElementById("sp-ok").onclick=function(){
   var cut=parseInt(document.getElementById("sp-cut").value,10);
@@ -310,19 +466,18 @@ function splitForm(o){
   document.getElementById("detail").innerHTML='<p class="empty">「'+esc(s1)+'」と「'+esc(s2)+'」に分けました。</p>';
  };
  document.getElementById("sp-cancel").onclick=function(){
-  var btn=btns[CUR>=0?0:0];
   load(CUR);
  };
 }
 function editForm(o,b){
- var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+'>'+LABEL[k]+'</option>'}).join("");
+ var opts=Object.keys(LABEL).map(function(k){return'<option value="'+k+'"'+(k===o.t?' selected':'')+">"+LABEL[k]+"</option>"}).join("");
  var dt=document.getElementById("detail");
- dt.innerHTML='<div class="w">'+esc(o.s)+'</div><label for="e-t">品詞</label><select id="e-t">'+opts+'</select>'
+ dt.innerHTML='<div class="w">'+esc(o.s)+'</div><label for="e-t">品詞</label><select id="e-t">'+opts+"</select>"
   +'<label for="e-b">原形</label><input id="e-b" value="'+esc(o.b||"").replace(/"/g,"&quot;")+'">'
   +'<label for="e-k">活用(例: ハ行下二段活用・連体形)</label><input id="e-k" value="'+esc(o.k||"").replace(/"/g,"&quot;")+'">'
-  +'<label for="e-d">意味</label><textarea id="e-d" rows="2">'+esc(o.d||o.ai||"")+'</textarea>'
+  +'<label for="e-d">意味</label><textarea id="e-d" rows="2">'+esc(o.d||o.ai||"")+"</textarea>"
   +'<div class="row"><button class="sm" id="e-ok">保存</button><button class="sm" id="e-reset">元に戻す</button><button class="sm" id="e-cancel">やめる</button></div>';
- function done(t){load(CUR);document.getElementById("detail").innerHTML='<p class="empty">'+t+'</p>'}
+ function done(t){load(CUR);document.getElementById("detail").innerHTML='<p class="empty">'+t+"</p>"}
  document.getElementById("e-ok").onclick=function(){
   USERFIX[o.key]={t:document.getElementById("e-t").value,b:document.getElementById("e-b").value.trim(),k:document.getElementById("e-k").value.trim(),d:document.getElementById("e-d").value.trim()};
   done(saveFix()?"直しを保存しました。":"保存できませんでした。")};
@@ -343,31 +498,35 @@ function sanitizePoem(o){
    if(t.plain)k.plain=true;row.push(k);joined+=t.s}
   lines.push(row)}
  if(!lines.length||joined!==plain)return null;
- return{author:(typeof o.author==="string"&&o.author)?o.author:"取り込み",text:plain,ruby:ruby,lines:lines,
-  tr:typeof o.tr==="string"?o.tr:"",gt:typeof o.gt==="string"?o.gt:"",grp:typeof o.grp==="string"?o.grp:"",kake:Array.isArray(o.kake)?o.kake.filter(function(x){return typeof x==="string"}):[]}}
+ var subVal=(typeof o.sub==="string"?o.sub:(typeof o.subtitle==="string"?o.subtitle:(typeof o.heading==="string"?o.heading:(typeof o.section==="string"?o.section:""))));
+ return{id:(o.id!==undefined&&o.id!==null&&String(o.id).trim()!=="")?String(o.id).trim():"",
+  author:(typeof o.author==="string"&&o.author)?o.author:"取り込み",text:plain,ruby:ruby,lines:lines,
+  tr:typeof o.tr==="string"?o.tr:(typeof o.translation==="string"?o.translation:""),
+  sub:subVal.trim(),
+  gt:typeof o.gt==="string"?o.gt:"",grp:typeof o.grp==="string"?o.grp:"",kake:Array.isArray(o.kake)?o.kake.filter(function(x){return typeof x==="string"}):[]}}
 function nextId(){var n=USER.length+1;while(USER.some(function(u){return u.id==="自"+n}))n++;return"自"+n}
-function addUser(p){p.id=nextId();p.user=true;USER.push(p)}
-function finishAdd(i){var ok=saveUser();rebuild();renderNav();load(i==null?ALL.length-1:i);el("add").hidden=true;
+function addUser(p){if(!p.id)p.id=nextId();p.user=true;USER.push(p)}
+function finishAdd(i){var ok=saveUser();rebuild();renderNav();load(i==null?ALL.length-1:i);el("add").hidden=true;el("b-add").setAttribute("aria-expanded","false");
  if(!ok)alert("保存できませんでした。端末の保存領域がいっぱいかもしれません。")}
 function mk(text){var t=text.trim().replace(/[ \u3000\n]+/g," ");var plain=t.replace(/《[^》]*》/g,"");
  return{text:plain.replace(/ /g,""),ruby:t,lines:plain.split(" ").filter(Boolean).map(function(s){return[{s:s,t:"n",plain:true}]})}}
-function clearForm(){["f-gt","f-author","f-text","f-tr","f-kake"].forEach(function(i){el(i).value=""});msg("")}
+function clearForm(){["f-gt","f-sub","f-author","f-text","f-tr","f-kake"].forEach(function(i){el(i).value=""});msg("")}
 function mode(){return document.querySelector('input[name="mode"]:checked').value}
 function setMode(){var s=mode()==="series";el("g-title-wrap").hidden=!s;el("kake-wrap").hidden=s;
  el("l-text").textContent=s?"本文(1首を1行に。5句はスペースで区切る。ルビは 漢字《よみ》)":"本文(5句をスペースで区切る。ルビは 漢字《よみ》)";
  el("l-tr").textContent=s?"現代語訳(1首ごとに1行。なくてもOK)":"現代語訳(あとで書いてもOK)"}
 Array.prototype.forEach.call(document.querySelectorAll('input[name="mode"]'),function(r){r.onchange=setMode});
 el("b-save").onclick=function(){
- var author=el("f-author").value.trim()||"自作・メモ",raw=el("f-text").value;
+ var author=el("f-author").value.trim()||"自作・メモ",raw=el("f-text").value,sub=el("f-sub").value.trim();
  if(mode()==="series"){
   var title=el("f-gt").value.trim();if(!title){msg("連作の題を入れてください");return}
   var rows=raw.split("\n").map(function(s){return s.trim()}).filter(Boolean);
   if(!rows.length){msg("本文を入れてください");return}
   var trs=el("f-tr").value.split("\n"),gid="g"+Date.now(),first=ALL.length;
-  rows.forEach(function(r,i){var p=mk(r);p.author=author;p.tr=(trs[i]||"").trim();p.kake=[];p.gt=title;p.grp=gid;addUser(p)});
+  rows.forEach(function(r,i){var p=mk(r);p.author=author;p.tr=(trs[i]||"").trim();p.sub=(i===0?sub:"");p.kake=[];p.gt=title;p.grp=gid;addUser(p)});
   clearForm();finishAdd(first);return}
  if(!raw.trim()){msg("本文を入れてください");return}
- var p=mk(raw);p.author=author;p.tr=el("f-tr").value.trim();
+ var p=mk(raw);p.author=author;p.sub=sub;p.tr=el("f-tr").value.trim();
  p.kake=el("f-kake").value.split("\n").map(function(s){return s.trim()}).filter(Boolean);
  addUser(p);clearForm();finishAdd()};
 el("f-file").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){el("f-json").value=r.result;msg("読み込みました。「取り込む」を押してください")};r.readAsText(f,"utf-8")};
@@ -382,6 +541,36 @@ el("b-import").onclick=function(){
   addUser(p);n++});
  if(!n){msg("取り込めませんでした(形式が違うか、本文と語の並びが合っていません)");return}
  el("f-json").value="";el("f-igt").value="";msg(n+"首を取り込みました"+(bad?"("+bad+"首は形式が合わず除きました)":""));finishAdd(first)};
+el("b-tr-apply").onclick=function(){
+ var raw=el("f-tr-bulk").value||"";
+ var lines=raw.split(/\r?\n/);
+ var map={};
+ lines.forEach(function(ln){
+  var t=ln.trim();if(!t)return;
+  var m=t.match(/^([^\t\s]+)\t+(.+)$/)||t.match(/^([^\t\s]+)\s+(.+)$/);
+  if(m)map[String(m[1]).trim()]=m[2].trim();
+ });
+ var keys=Object.keys(map);
+ if(!keys.length){msg("「番号\t現代語訳」の行が見つかりませんでした");return}
+ var hit=0;
+ ALL.forEach(function(poem,idx){
+  var candidates=[];
+  if(poem.id!==undefined&&String(poem.id).trim()!=="")candidates.push(String(poem.id).trim());
+  candidates.push(String(idx+1));
+  for(var i=0;i<candidates.length;i++){
+   if(Object.prototype.hasOwnProperty.call(map,candidates[i])){
+    if(!poem.user)ensureEditablePoem();
+    poem.tr=map[candidates[i]];
+    hit++;
+    break;
+   }
+  }
+ });
+ if(!hit){msg("一致する歌の番号が見つかりませんでした");return}
+ el("f-tr-bulk").value="";
+ msg(hit+"首に現代語訳を反映しました");
+ finishAdd(CUR);
+};
 el("b-export").onclick=function(){
  if(!USER.length){msg("自分で足した歌がまだありません");return}
  (navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(USER)):Promise.reject()).then(function(){msg(USER.length+"首ぶんをコピーしました。メモアプリなどに貼って保管してください")},function(){msg("コピーできませんでした")})};
